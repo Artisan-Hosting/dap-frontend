@@ -42,29 +42,6 @@ export function TestSettingsModal({
     }
   }, [isOpen, selectedTestIds]);
 
-  function handleSave() {
-    const hasInternalSelected = draftSelection.some(id => {
-      const test = tests.find(t => t.id === id);
-      return test && isInternalTest(test);
-    });
-
-    if (hasInternalSelected) {
-      trackEvent('Test Selection Warning Shown', {
-        warning_type: 'internal_tests',
-        ...getSelectionSummary(draftSelection, tests),
-      });
-      setShowInternalWarning(true);
-      return;
-    }
-
-    trackEvent('Test Selection Saved', {
-      save_mode: 'normal',
-      ...getSelectionSummary(draftSelection, tests),
-    });
-    onSave(draftSelection.filter((testId) => supportedTestIds.includes(testId)));
-    onClose();
-  }
-
   if (!isOpen) {
     return null;
   }
@@ -91,22 +68,42 @@ export function TestSettingsModal({
                 className="btn btn-primary"
                 onClick={() => {
                   trackEvent('Test Selection Saved', {
-                    save_mode: 'run_anyway',
+                    save_mode: 'warning_acknowledged',
                     ...getSelectionSummary(draftSelection, tests),
                   });
                   setShowInternalWarning(false);
-                  onSave(draftSelection.filter((testId) => supportedTestIds.includes(testId)));
-                  onClose();
                 }}
                 type="button"
               >
-                Run Anyway
+                Got It
               </button>
             </div>
           </div>
         </div>
       </div>
     );
+  }
+
+  function persistSelection(nextSelection: string[], saveMode: 'normal' | 'bulk_update') {
+    const filteredSelection = nextSelection.filter((testId) => supportedTestIds.includes(testId));
+    const hasInternalSelected = filteredSelection.some((testId) => {
+      const test = tests.find((candidate) => candidate.id === testId);
+      return test ? isInternalTest(test) : false;
+    });
+
+    trackEvent('Test Selection Saved', {
+      save_mode: saveMode,
+      ...getSelectionSummary(filteredSelection, tests),
+    });
+    onSave(filteredSelection);
+
+    if (hasInternalSelected) {
+      trackEvent('Test Selection Warning Shown', {
+        warning_type: 'internal_tests',
+        ...getSelectionSummary(filteredSelection, tests),
+      });
+      setShowInternalWarning(true);
+    }
   }
 
   function toggleTest(testId: string) {
@@ -123,6 +120,7 @@ export function TestSettingsModal({
         ...getSelectionSummary(nextSelection, tests),
       });
 
+      persistSelection(nextSelection, 'normal');
       return nextSelection;
     });
   }
@@ -150,11 +148,12 @@ export function TestSettingsModal({
               <button
                 className="btn btn-small"
                 onClick={() => {
+                  setDraftSelection(supportedTestIds);
                   trackEvent('Test Selection Bulk Updated', {
                     action: 'select_all',
                     ...getSelectionSummary(supportedTestIds, tests),
                   });
-                  setDraftSelection(supportedTestIds);
+                  persistSelection(supportedTestIds, 'bulk_update');
                 }}
                 type="button"
               >
@@ -163,11 +162,12 @@ export function TestSettingsModal({
               <button
                 className="btn btn-small"
                 onClick={() => {
+                  setDraftSelection([]);
                   trackEvent('Test Selection Bulk Updated', {
                     action: 'clear_all',
                     ...getSelectionSummary([], tests),
                   });
-                  setDraftSelection([]);
+                  persistSelection([], 'bulk_update');
                 }}
                 type="button"
               >
@@ -199,15 +199,6 @@ export function TestSettingsModal({
                 </label>
               );
             })}
-          </div>
-
-          <div className="contact-actions">
-            <button className="btn btn-secondary" onClick={onClose} type="button">
-              Cancel
-            </button>
-            <button className="btn btn-primary" onClick={handleSave} type="button">
-              Save Selection
-            </button>
           </div>
         </div>
       </div>

@@ -903,8 +903,8 @@ input:focus, textarea:focus, select:focus {
 
   .logo-image-mobile {
     display: block;
-    width: 22px;
-    height: 22px;
+    width: 44px;
+    height: 44px;
   }
 
   .topbar {
@@ -1848,8 +1848,8 @@ input:focus, textarea:focus, select:focus {
   }
 
   .logo-image-mobile {
-    width: 22px;
-    height: 22px;
+    width: 44px;
+    height: 44px;
   }
 
   .history-list {
