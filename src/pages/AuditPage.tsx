@@ -540,7 +540,7 @@ function AuditPage() {
 
               <div className="quirky-text">
                 <span className="quirky-dot">●</span>
-                {getQuirkyText(runState, quirkyIndex)}
+                <span className="quirky-message">{getQuirkyText(runState, quirkyIndex)}</span>
               </div>
 
               {isConnectionError && (

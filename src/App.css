@@ -225,13 +225,13 @@
   overflow: hidden;
 }
 
-.quirky-text span:last-child {
-  min-width: 420px;
-  display: inline-block;
+.quirky-message {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
   text-align: left;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: calc(100% - 30px);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @keyframes fadeIn {
@@ -240,7 +240,9 @@
 }
 
 .quirky-dot {
+  flex: 0 0 auto;
   color: var(--wine);
+  line-height: 1.1;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
