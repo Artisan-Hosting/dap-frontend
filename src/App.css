@@ -601,6 +601,12 @@
   align-items: center;
 }
 
+.logo-image {
+  display: block;
+  width: 188px;
+  height: auto;
+}
+
 .active-link {
   position: relative;
   color: var(--text-1) !important;
@@ -721,21 +727,7 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-width: 190px;
-}
-
-.brand h1 {
-  font-size: 15px;
-  letter-spacing: 0.2px;
-  margin: 0;
-}
-
-.brand span {
-  display: block;
-  color: var(--text-3);
-  font-size: 12px;
-  margin-top: 2px;
+  min-width: 188px;
 }
 
 .nav {
@@ -1706,6 +1698,10 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (max-width: 768px) {
+  .logo-image {
+    width: 152px;
+  }
+
   .history-list {
     grid-template-columns: 1fr;
   }

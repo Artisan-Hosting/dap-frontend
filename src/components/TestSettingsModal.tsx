@@ -69,6 +69,40 @@ export function TestSettingsModal({
 
   const supportedTestIds = tests.map((test) => test.id);
 
+  if (showInternalWarning) {
+    return (
+      <div className="modal-overlay" onClick={() => setShowInternalWarning(false)}>
+        <div className="modal-content contact-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>Internal Tests Selected</h3>
+            <button className="modal-close" onClick={() => setShowInternalWarning(false)} type="button">✕</button>
+          </div>
+          <div className="contact-form">
+            <p className="contact-copy">
+              These are really in-depth tests, they may take over 10 minutes to finish on larger domains.
+            </p>
+            <div className="contact-actions">
+              <button className="btn btn-secondary" onClick={() => setShowInternalWarning(false)} type="button">
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowInternalWarning(false);
+                  onSave(draftSelection.filter((testId) => supportedTestIds.includes(testId)));
+                  onClose();
+                }}
+                type="button"
+              >
+                Run Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function toggleTest(testId: string) {
     setDraftSelection((current) =>
       current.includes(testId)
@@ -147,42 +181,6 @@ export function TestSettingsModal({
       </div>
     </div>
   );
-
-  if (showInternalWarning) {
-    return (
-      <div className="modal-overlay" onClick={() => setShowInternalWarning(false)}>
-        <div className="modal-content contact-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Internal Tests Selected</h3>
-            <button className="modal-close" onClick={() => setShowInternalWarning(false)} type="button">✕</button>
-          </div>
-          <div className="contact-form">
-            <p className="contact-copy">
-              These are really in-depth tests, they may take over 10 minutes to finish on larger domains.
-            </p>
-            <div className="contact-actions">
-              <button className="btn btn-secondary" onClick={() => setShowInternalWarning(false)} type="button">
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  setShowInternalWarning(false);
-                  onSave(draftSelection.filter((testId) => supportedTestIds.includes(testId)));
-                  onClose();
-                }}
-                type="button"
-              >
-                Run Anyway
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
 }
 
 export default TestSettingsModal;

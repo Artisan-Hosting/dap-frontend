@@ -164,8 +164,6 @@ function AuditPage() {
     const storedSelectedTestIds = loadSelectedTestIds();
 
     if (supportedIds.length === 0) {
-      setSelectedTestIds([]);
-      persistSelectedTestIds([]);
       return;
     }
 

@@ -6,6 +6,8 @@ interface TopBarProps {
   onOpenSettings?: () => void;
 }
 
+const ARTISAN_LOGO_URL = 'https://www.artisanhosting.net/imgs/artisan-studios__lockup__light__2048w.webp';
+
 export function TopBar({ children, onOpenSettings }: TopBarProps) {
   const location = useLocation();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -15,21 +17,11 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
       <div className="topbar-inner">
         <Link to="/" className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="logo-icon">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-              <rect width="44" height="44" rx="8" fill="var(--navy)" />
-              <path
-                d="M12 32L22 12L32 32"
-                stroke="var(--sky)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="22" cy="24" r="4" fill="var(--wine)" />
-            </svg>
-          </div>
-          <div>
-            <h1>Artisan DAP</h1>
-            <span>Domain Auditing Platform</span>
+            <img
+              className="logo-image"
+              src={ARTISAN_LOGO_URL}
+              alt="Artisan Hosting"
+            />
           </div>
         </Link>
 
