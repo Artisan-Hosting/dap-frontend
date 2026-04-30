@@ -134,12 +134,14 @@ export function ContactRequestModal({
         ) : (
           <form className="contact-form" onSubmit={handleSubmit}>
             <p className="contact-copy">
-              These audits are extremely helpful for building testing and auditing infrastructure and
-              making sure the right buttons are clicked and the wires are connected properly. They
-              can also be overwhelming, so fill out the form below and tell us what you want to
-              know about the tests. That can be an email exchange with people who know the stack, up
-              to a 30 minute call about your infra, what you should pay attention to, and a set of
-              actionable items to harden your domain.
+              These audits are incredibly useful for building, testing, and auditing infrastructure,
+              and for making sure the right wires are connected and the right buttons are being
+              pushed. That said, if you do not have a clear target or goal, they can get noisy fast
+              and flag things your specific site may not actually need. If you want professional
+              guidance or want someone to review your results and help prioritize what matters, fill
+              out the form below. We will get your audit and your question, then reach out by email
+              or with up to a 30 minute call about your infrastructure, what deserves attention,
+              and the most actionable ways to harden your site.
             </p>
 
             <label className="contact-field">
