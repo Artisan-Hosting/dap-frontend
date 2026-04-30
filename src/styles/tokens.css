@@ -1,0 +1,92 @@
+:root {
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Fraunces', ui-serif, Georgia, 'Times New Roman', Times, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+  --sky: #A7C7E7;
+  --navy: #0B132B;
+  --charcoal: #1F2430;
+  --paper: #F6F7FB;
+  --wine: #912F40;
+  --warm: #E7E7A7;
+
+  --bg: var(--paper);
+  --surface-1: #FFFFFF;
+  --surface-2: #EEF2F7;
+  --border: #D8DEE9;
+  --shadow: rgba(11,19,43,0.10);
+
+  --text-1: var(--charcoal);
+  --text-2: rgba(31,36,48,0.72);
+  --text-3: rgba(31,36,48,0.55);
+  --link: var(--navy);
+  --link-hover: var(--wine);
+
+  --btn-primary-bg: var(--navy);
+  --btn-primary-hover: #0F1A3D;
+  --btn-primary-text: var(--paper);
+
+  --btn-secondary-bg: var(--sky);
+  --btn-secondary-hover: #93B9E0;
+  --btn-secondary-text: var(--navy);
+
+  --btn-ghost-text: var(--navy);
+  --btn-ghost-hover: rgba(167,199,231,0.25);
+
+  --info-soft: rgba(167,199,231,0.35);
+  --focus-ring: rgba(11,19,43,0.25);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+  --maxw: 1500px;
+}
+
+:root[data-theme="dark"] {
+  --bg: var(--navy);
+  --surface-1: #121B33;
+  --surface-2: #1A2440;
+  --border: rgba(246,247,251,0.12);
+  --shadow: rgba(0,0,0,0.35);
+
+  --text-1: var(--paper);
+  --text-2: rgba(246,247,251,0.78);
+  --text-3: rgba(246,247,251,0.58);
+  --link: var(--sky);
+  --link-hover: var(--warm);
+
+  --btn-primary-bg: var(--sky);
+  --btn-primary-hover: #93B9E0;
+  --btn-primary-text: var(--navy);
+
+  --btn-secondary-bg: #1A2440;
+  --btn-secondary-hover: #243055;
+  --btn-secondary-text: var(--paper);
+  --btn-secondary-border: rgba(246,247,251,0.18);
+
+  --btn-ghost-text: var(--sky);
+  --btn-ghost-hover: rgba(167,199,231,0.14);
+
+  --info-soft: rgba(167,199,231,0.16);
+  --focus-ring: rgba(167,199,231,0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-1);
+  background: var(--bg);
+  background-attachment: fixed;
+  line-height: 1.45;
+}
+
+#root {
+  min-height: 100%;
+}

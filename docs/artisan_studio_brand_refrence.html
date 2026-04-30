@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Artisan Studios — Color Mock</title>
+  <style>
+    /* Google Fonts (for accurate typography preview) */
+    @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Fraunces:opsz,wght@9..144,400;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+
+    /* ===== Brand tokens (from Color Theory.md) ===== */
+    :root{
+    --font-sans: 'Source Sans 3', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    --font-serif: 'Fraunces', ui-serif, Georgia, 'Times New Roman', Times, serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+
+      --sky: #A7C7E7;
+      --navy: #0B132B;
+      --charcoal: #1F2430;
+      --paper: #F6F7FB;
+      --wine: #912F40;
+      --warm: #E7E7A7;
+
+      /* Light mode tokens */
+      --bg: var(--paper);
+      --surface-1: #FFFFFF;
+      --surface-2: #EEF2F7;
+      --border: #D8DEE9;
+      --shadow: rgba(11,19,43,0.10);
+
+      --text-1: var(--charcoal);
+      --text-2: rgba(31,36,48,0.72);
+      --text-3: rgba(31,36,48,0.55);
+      --link: var(--navy);
+      --link-hover: var(--wine);
+
+      --btn-primary-bg: var(--navy);
+      --btn-primary-hover: #0F1A3D;
+      --btn-primary-text: var(--paper);
+
+      --btn-secondary-bg: var(--sky);
+      --btn-secondary-hover: #93B9E0;
+      --btn-secondary-text: var(--navy);
+
+      --btn-ghost-text: var(--navy);
+      --btn-ghost-hover: rgba(167,199,231,0.25);
+
+      --info-soft: rgba(167,199,231,0.35);
+      --focus-ring: rgba(11,19,43,0.25);
+
+      --radius: 18px;
+      --radius-sm: 12px;
+      --maxw: 1080px;
+    }
+
+    /* Dark mode tokens */
+    :root[data-theme="dark"]{
+      --bg: var(--navy);
+      --surface-1: #121B33;
+      --surface-2: #1A2440;
+      --border: rgba(246,247,251,0.12);
+      --shadow: rgba(0,0,0,0.35);
+
+      --text-1: var(--paper);
+      --text-2: rgba(246,247,251,0.78);
+      --text-3: rgba(246,247,251,0.58);
+      --link: var(--sky);
+      --link-hover: var(--warm);
+
+      --btn-primary-bg: var(--sky);
+      --btn-primary-hover: #93B9E0;
+      --btn-primary-text: var(--navy);
+
+      --btn-secondary-bg: #1A2440;
+      --btn-secondary-hover: #243055;
+      --btn-secondary-text: var(--paper);
+      --btn-secondary-border: rgba(246,247,251,0.18);
+
+      --btn-ghost-text: var(--sky);
+      --btn-ghost-hover: rgba(167,199,231,0.14);
+
+      --info-soft: rgba(167,199,231,0.16);
+      --focus-ring: rgba(167,199,231,0.55);
+    }
+
+    /* ===== Base ===== */
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--font-sans);
+      color: var(--text-1);
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(167,199,231,0.22), transparent 55%),
+                  radial-gradient(900px 500px at 85% 10%, rgba(231,231,167,0.18), transparent 60%),
+                  var(--bg);
+      line-height: 1.45;
+    }
+    a{ color: var(--link); text-decoration: none; border-bottom: 1px solid transparent; }
+    a:hover{ color: var(--link-hover); border-bottom-color: var(--link-hover); }
+    .wrap{ max-width: var(--maxw); margin: 0 auto; padding: 28px 18px 60px; }
+    .row{ display:flex; gap:16px; align-items:center; }
+    .grow{ flex:1; }
+    .pill{
+      display:inline-flex; align-items:center; gap:10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--info-soft);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      font-size: 13px;
+    }
+    .dot{ width:10px; height:10px; border-radius: 999px; background: var(--wine); box-shadow: 0 0 0 4px rgba(145,47,64,0.18); }
+    .topbar{
+      position: sticky; top:0; z-index: 50;
+      backdrop-filter: blur(10px);
+      background: color-mix(in srgb, var(--bg) 72%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner{ max-width: var(--maxw); margin:0 auto; padding: 14px 18px; display:flex; align-items:center; gap:14px; }
+    .brand{
+      display:flex; align-items:center; gap:12px; min-width: 190px;
+    }
+    .logo{
+      display:flex; align-items:center;
+      height: 44px;
+      max-width: 240px;
+    }
+    .logo-img{
+      height: 44px;
+      width: auto;
+      display:block;
+    }
+    .logo-dark{ display:none; }
+    :root[data-theme="dark"] .logo-light{ display:none; }
+    :root[data-theme="dark"] .logo-dark{ display:block; }
+.brand h1{ font-size: 15px; letter-spacing: 0.2px; margin:0; }
+    .brand span{ display:block; color: var(--text-3); font-size: 12px; margin-top: 2px; }
+
+    .nav{
+      display:flex; gap: 14px; align-items:center;
+      font-size: 14px; color: var(--text-2);
+    }
+    .nav a{ padding: 6px 8px; border-radius: 10px; border-bottom: 0; }
+    .nav a:hover{ background: var(--btn-ghost-hover); color: var(--text-1); }
+
+    .actions{ display:flex; gap:10px; align-items:center; }
+
+    button, .btn{
+      appearance:none; border: 1px solid transparent;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 600;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      display:inline-flex; align-items:center; gap:10px;
+      user-select:none;
+    }
+    button:active, .btn:active{ transform: translateY(1px); }
+    .btn-primary{
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+      box-shadow: 0 14px 40px var(--shadow);
+    }
+    .btn-primary:hover{ background: var(--btn-primary-hover); }
+    .btn-secondary{
+      background: var(--btn-secondary-bg);
+      color: var(--btn-secondary-text);
+      border-color: var(--btn-secondary-border, transparent);
+    }
+    .btn-secondary:hover{ background: var(--btn-secondary-hover); }
+    .btn-ghost{
+      background: transparent;
+      color: var(--btn-ghost-text);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover{ background: var(--btn-ghost-hover); }
+
+    .icon{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: var(--warm);
+      box-shadow: 0 0 0 4px rgba(231,231,167,0.22);
+    }
+
+    /* ===== Layout blocks ===== */
+    .hero{
+      margin-top: 24px;
+      padding: 28px;
+      border-radius: calc(var(--radius) + 8px);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--surface-1) 88%, transparent), var(--surface-2));
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px var(--shadow);
+      overflow:hidden;
+      position: relative;
+    }
+    .hero:before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(600px 200px at 15% 10%, rgba(167,199,231,0.35), transparent 62%),
+                  radial-gradient(520px 220px at 85% 0%, rgba(145,47,64,0.18), transparent 60%);
+      pointer-events:none;
+      opacity: .9;
+    }
+    :root[data-theme="dark"] .hero:before{
+      background: radial-gradient(600px 220px at 15% 10%, rgba(167,199,231,0.22), transparent 62%),
+                  radial-gradient(520px 220px at 85% 0%, rgba(231,231,167,0.10), transparent 60%);
+    }
+    .hero > *{ position: relative; }
+    .hero h2{ font-size: 34px; line-height: 1.1; margin: 0 0 10px; }
+    .hero p{ margin: 0 0 16px; color: var(--text-2); max-width: 58ch; }
+    .hero .subrow{ display:flex; gap:10px; flex-wrap: wrap; align-items:center; }
+    .hero .note{ color: var(--text-3); font-size: 13px; }
+
+    .grid{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .brand{ min-width: auto; }
+      .nav{ display:none; }
+    }
+
+    .card{
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 18px 48px var(--shadow);
+      padding: 18px;
+    }
+    .card h3{ margin: 0 0 10px; font-size: 16px; }
+    .muted{ color: var(--text-2); }
+
+    .form{
+      display:grid;
+      gap: 10px;
+    }
+    label{ font-size: 12px; color: var(--text-3); }
+    input, textarea, select{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-2) 40%, var(--surface-1));
+      color: var(--text-1);
+      outline: none;
+      transition: box-shadow .12s ease, border-color .12s ease;
+    }
+    textarea{ min-height: 88px; resize: vertical; }
+    input:focus, textarea:focus, select:focus{
+      border-color: color-mix(in srgb, var(--sky) 65%, var(--border));
+      box-shadow: 0 0 0 4px var(--focus-ring);
+    }
+    .inline{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      font-size: 12px;
+      color: var(--text-2);
+      margin: 6px 6px 0 0;
+    }
+    .tag b{ color: var(--text-1); font-weight: 650; }
+
+    .swatches{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .sw{
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow:hidden;
+      background: var(--surface-1);
+      box-shadow: 0 10px 28px var(--shadow);
+    }
+    .sw .c{
+      height: 52px;
+    }
+    .sw .meta{
+      padding: 10px;
+      font-size: 12px;
+      color: var(--text-2);
+      display:flex; justify-content:space-between; gap:8px;
+    }
+    .sw code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      color: var(--text-3);
+    }
+    .divider{
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+      opacity: .9;
+    }
+    .callout{
+      border-left: 4px solid var(--wine);
+      background: color-mix(in srgb, var(--info-soft) 45%, var(--surface-1));
+      padding: 12px 12px 12px 14px;
+      border-radius: 14px;
+      color: var(--text-2);
+    }
+    .callout b{ color: var(--text-1); }
+
+    .footer{
+      margin-top: 22px;
+      color: var(--text-3);
+      font-size: 12px;
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Fancy “active” treatment using wine as stroke */
+    .active-link{
+      position: relative;
+      color: var(--text-1) !important;
+      background: color-mix(in srgb, var(--btn-ghost-hover) 65%, transparent);
+    }
+    .active-link:after{
+      content:"";
+      position:absolute;
+      left: 10px; right: 10px; bottom: 4px;
+      height: 2px;
+      background: var(--wine);
+      border-radius: 999px;
+      opacity: .9;
+    }
+  
+    /* Typography showcase */
+    .type-grid { display: grid; gap: 16px; grid-template-columns: 1.1fr .9fr; align-items: start; }
+    @media (max-width: 980px) { .type-grid { grid-template-columns: 1fr; } }
+    .type-samples { display: grid; gap: 12px; }
+    .sample { padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-2); }
+    .sample .label { display:flex; align-items:center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .sample .label code { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+    .sample .label .tag { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .sample.sans .preview { font-family: var(--font-sans); }
+    .sample.serif .preview { font-family: var(--font-serif); }
+    .sample.mono .preview { font-family: var(--font-mono); }
+    .preview h3 { margin: 0 0 8px; }
+    .preview p { margin: 0; }
+    .type-rules { display: grid; gap: 12px; }
+    .rule { padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .rule h3 { margin: 0 0 8px; }
+    .rule ul { margin: 0; padding-left: 18px; color: var(--muted); }
+    .quote { font-family: var(--font-serif); font-size: 20px; line-height: 1.4; margin: 0; }
+    .quote strong { font-weight: 600; }
+    pre, code { font-family: var(--font-mono); }
+
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-label="Artisan Studios logo">
+          <img class="logo-img logo-light" src="/home/dwhitfield/Documents/studio/Branding/Logo/out/webp/artisan-studios__lockup__dark__2048w.webp" alt="Artisan Studios" />
+          <img class="logo-img logo-dark" src="/home/dwhitfield/Documents/studio/Branding/Logo/out/webp/artisan-studios__lockup__light__2048w.webp" alt="Artisan Studios" />
+        </div>
+        <div>
+          <h1>Artisan Studios</h1>
+          <span>Color mock: Sky / Navy / Wine / Warm</span>
+        </div>
+      </div>
+
+      <nav class="nav grow" aria-label="Primary">
+        <a class="active-link" href="#">Work</a>
+        <a href="#">Services</a>
+        <a href="#">Pricing</a>
+        <a href="#">Contact</a>
+      </nav>
+
+      <div class="actions">
+        <span class="pill"><span class="dot"></span> Accent uses wine as a stroke</span>
+        <button class="btn btn-ghost" id="themeToggle" type="button" aria-label="Toggle theme">
+          <span class="icon" aria-hidden="true"></span>
+          <span>Toggle</span>
+        </button>
+        <a class="btn btn-primary" href="#book">Book a consult</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="row" style="align-items:flex-start; gap:18px; flex-wrap:wrap;">
+        <div class="grow" style="min-width: 280px;">
+          <h2>Bold + clean, with soft sky and warm highlights.</h2>
+          <p>
+            This page is just a sandbox for the palette: sky as the “friendly” brand color,
+            navy/charcoal for structure, wine for intent, and warm for sparkle.
+          </p>
+
+          <div class="subrow">
+            <a class="btn btn-secondary" href="#work">See work</a>
+            <button class="btn btn-ghost" type="button">Ask a question</button>
+            <span class="note">Try the toggle in the top-right.</span>
+          </div>
+        </div>
+
+        <div style="min-width: 260px; flex: 0 1 360px;">
+          <div class="card">
+            <h3 style="margin-bottom: 8px;">Quick palette check</h3>
+            <div class="muted">These swatches are your base set.</div>
+            <div class="swatches">
+              <div class="sw">
+                <div class="c" style="background: var(--sky)"></div>
+                <div class="meta"><span>Sky</span><code>#A7C7E7</code></div>
+              </div>
+              <div class="sw">
+                <div class="c" style="background: var(--navy)"></div>
+                <div class="meta"><span>Navy</span><code>#0B132B</code></div>
+              </div>
+              <div class="sw">
+                <div class="c" style="background: var(--charcoal)"></div>
+                <div class="meta"><span>Charcoal</span><code>#1F2430</code></div>
+              </div>
+              <div class="sw">
+                <div class="c" style="background: var(--paper)"></div>
+                <div class="meta"><span>Paper</span><code>#F6F7FB</code></div>
+              </div>
+              <div class="sw">
+                <div class="c" style="background: var(--wine)"></div>
+                <div class="meta"><span>Wine</span><code>#912F40</code></div>
+              </div>
+              <div class="sw">
+                <div class="c" style="background: var(--warm)"></div>
+                <div class="meta"><span>Warm</span><code>#E7E7A7</code></div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="callout">
+              <b>Flip rule:</b> light mode uses navy as structure; dark mode uses sky as structure.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="block" id="typography" style="margin-top: 28px;">
+      <div class="row" style="align-items:flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div>
+          <h2 style="margin: 0 0 6px;">Typography</h2>
+          <p class="muted" style="margin: 0;">
+            Three-font system: <strong>Source Sans 3</strong> for most UI, <strong>Fraunces</strong> for editorial charm,
+            and <strong>IBM Plex Mono</strong> for technical clarity.
+          </p>
+        </div>
+        <div class="pill"><span class="dot"></span> Fraunces is seasoning (10–15%), not the meal</div>
+      </div>
+
+      <div class="type-grid" style="margin-top: 16px;">
+        <div class="type-samples">
+          <div class="sample sans">
+            <div class="label">
+              <div class="tag">Primary / System</div>
+              <code>--font-sans</code>
+            </div>
+            <div class="preview">
+              <h3 style="font-weight: 700;">Build bold, clean pages with clear structure.</h3>
+              <p class="muted">
+                Use this for headings, body copy, navigation, buttons, forms, services, FAQ, and case studies.
+              </p>
+              <div class="subrow" style="margin-top: 12px;">
+                <a class="btn btn-primary" href="#book">Primary button</a>
+                <a class="btn btn-secondary" href="#work">Secondary</a>
+                <span class="note">Weights: 400 / 600 / 700</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sample serif">
+            <div class="label">
+              <div class="tag">Accent / Editorial</div>
+              <code>--font-serif</code>
+            </div>
+            <div class="preview">
+              <p class="quote">
+                “A little <strong>charm</strong> goes a long way — keep it short, intentional, and on purpose.”
+              </p>
+              <p class="muted" style="margin-top: 10px;">
+                Great for pull quotes, testimonials, and 1–2 sentence section intros. Avoid long paragraphs.
+              </p>
+            </div>
+          </div>
+
+          <div class="sample mono">
+            <div class="label">
+              <div class="tag">Utility / Technical</div>
+              <code>--font-mono</code>
+            </div>
+            <div class="preview">
+              <p class="muted" style="margin-bottom: 10px;">Use for IDs, timestamps, pricing tables, specs, and tiny labels.</p>
+<pre style="margin:0; padding:12px; border-radius: 14px; background: rgba(0,0,0,.06); border: 1px solid var(--border); overflow:auto;">
+STATUS: OK
+VERSION: v0.1
+PATH: /logos/artisan-studios__wordmark__dark__2048w.webp
+</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="type-rules">
+          <div class="rule">
+            <h3>Type hierarchy (simple)</h3>
+            <ul>
+              <li><strong>H1</strong>: Sans 700 (or 600 for softer)</li>
+              <li><strong>H2/H3</strong>: Sans 600</li>
+              <li><strong>Body</strong>: Sans 400</li>
+              <li><strong>Buttons</strong>: Sans 600</li>
+              <li><strong>Quotes</strong>: Fraunces 400–600</li>
+              <li><strong>Data</strong>: Plex Mono 400–500</li>
+            </ul>
+          </div>
+
+          <div class="rule">
+            <h3>Rules of thumb</h3>
+            <ul>
+              <li>Prefer weight changes over switching fonts.</li>
+              <li>Keep mono for “data-ish” things, not general copy.</li>
+              <li>If a page feels too serious, add a short Fraunces line — then stop.</li>
+            </ul>
+          </div>
+
+          <div class="rule">
+            <h3>Where this shows up</h3>
+            <ul>
+              <li>Nav + UI: Source Sans 3</li>
+              <li>Testimonials: Fraunces</li>
+              <li>Pricing/spec tables: IBM Plex Mono</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="grid" id="work" aria-label="Content">
+      <article class="card">
+        <h3>Example content card</h3>
+        <p class="muted">
+          Use this as a stand-in for “project highlights” or a homepage section. Notice how
+          the wine accent works best as a line / small highlight, not a full fill.
+        </p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
+          <span class="tag"><b>01</b> Landing pages</span>
+          <span class="tag"><b>02</b> Booking flows</span>
+          <span class="tag"><b>03</b> Brand refresh</span>
+          <span class="tag"><b>04</b> Fast hosting</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row" style="flex-wrap:wrap;">
+          <div class="grow">
+            <div class="muted" style="font-size:13px; margin-bottom:6px;">Tiny “stats” row</div>
+            <div class="row" style="gap:10px; flex-wrap:wrap;">
+              <div class="pill"><span class="dot"></span> 0.38s TTI vibes</div>
+              <div class="pill"><span class="icon"></span> Local + high-touch</div>
+              <div class="pill"><span class="icon"></span> Clean + bold</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <a class="btn btn-secondary" href="#book">Get a quote</a>
+            <a class="btn btn-ghost" href="#">Read more</a>
+          </div>
+        </div>
+      </article>
+
+      <aside class="card" id="book">
+        <h3>Mini form sandbox</h3>
+        <p class="muted" style="margin-top:-2px;">Just to see inputs, borders, focus, buttons.</p>
+
+        <form class="form" onsubmit="return false;">
+          <div class="inline">
+            <div>
+              <label for="name">Name</label>
+              <input id="name" placeholder="Darrion" />
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" placeholder="you@domain.com" />
+            </div>
+          </div>
+
+          <div>
+            <label for="service">Service</label>
+            <select id="service">
+              <option>Website refresh</option>
+              <option>Landing page</option>
+              <option>Booking flow</option>
+              <option>Brand kit assist</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="message">What are we building?</label>
+            <textarea id="message" placeholder="A bold + clean site with a smooth booking flow..."></textarea>
+          </div>
+
+          <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <button class="btn btn-primary" type="button">Send request</button>
+            <button class="btn btn-secondary" type="button">Add to Trello</button>
+            <button class="btn btn-ghost" type="button">Text me instead</button>
+          </div>
+
+          <p class="muted" style="font-size:12px; margin: 4px 0 0;">
+            Link styles: <a href="#">normal link</a> · <a href="#">hover me</a>
+          </p>
+        </form>
+      </aside>
+    </section>
+
+    <div class="footer">
+      <span>Tip: if wine feels loud, keep it to strokes, underlines, badges.</span>
+      <span>Palette source: Color Theory.md</span>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+
+      function apply(theme){
+        root.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+      }
+
+      const saved = localStorage.getItem('theme');
+      if(saved === 'dark' || saved === 'light') apply(saved);
+
+      btn.addEventListener('click', () => {
+        const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        apply(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+</body>
+</html>

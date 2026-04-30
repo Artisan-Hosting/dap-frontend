@@ -1,0 +1,9 @@
+/* Base reset - tokens are imported in App.tsx */
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
