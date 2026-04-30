@@ -903,8 +903,8 @@ input:focus, textarea:focus, select:focus {
 
   .logo-image-mobile {
     display: block;
-    width: 44px;
-    height: 44px;
+    width: 22px;
+    height: 22px;
   }
 
   .topbar {
@@ -1010,6 +1010,15 @@ input:focus, textarea:focus, select:focus {
 
 .settings-btn {
   margin-right: 8px;
+}
+
+.settings-btn-icon {
+  flex: 0 0 auto;
+  transition: transform 0.18s ease;
+}
+
+.settings-btn:hover .settings-btn-icon {
+  transform: rotate(18deg);
 }
 
 .settings-btn-label {
@@ -1836,6 +1845,11 @@ input:focus, textarea:focus, select:focus {
 @media (max-width: 768px) {
   .logo-image {
     width: 152px;
+  }
+
+  .logo-image-mobile {
+    width: 22px;
+    height: 22px;
   }
 
   .history-list {
