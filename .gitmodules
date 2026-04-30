@@ -1,0 +1,4 @@
+[submodule "backend"]
+	path = backend
+	url = git@github.com:Artisan-Hosting/dap-backend.git
+	branch = release
