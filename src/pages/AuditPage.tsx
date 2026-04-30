@@ -90,6 +90,16 @@ function getQuirkyText(state: RunState | null, index: number): string {
   return texts[index % texts.length];
 }
 
+function isInternalDiscoveryAddon(test: SupportedTest): boolean {
+  return test.category === 'internal' || test.runtime === 'internal';
+}
+
+function getDefaultSelectedTestIds(tests: SupportedTest[]): string[] {
+  return tests
+    .filter((test) => !isInternalDiscoveryAddon(test))
+    .map((test) => test.id);
+}
+
 const SELECTED_TESTS_STORAGE_KEY = 'artisan-dap-selected-tests';
 
 function loadSelectedTestIds(): string[] | null {
@@ -161,6 +171,7 @@ function AuditPage() {
 
   useEffect(() => {
     const supportedIds = supportedTests.map((test) => test.id);
+    const defaultSelectedIds = getDefaultSelectedTestIds(supportedTests);
     const storedSelectedTestIds = loadSelectedTestIds();
 
     if (supportedIds.length === 0) {
@@ -168,18 +179,21 @@ function AuditPage() {
     }
 
     if (!storedSelectedTestIds) {
-      setSelectedTestIds(supportedIds);
-      persistSelectedTestIds(supportedIds);
+      setSelectedTestIds(defaultSelectedIds);
+      persistSelectedTestIds(defaultSelectedIds);
       return;
     }
 
-    const hasUnavailableStoredTests = storedSelectedTestIds.some(
-      (testId) => !supportedIds.includes(testId)
+    const availableStoredSelection = storedSelectedTestIds.filter((testId) =>
+      supportedIds.includes(testId)
     );
 
-    if (hasUnavailableStoredTests) {
-      setSelectedTestIds(supportedIds);
-      persistSelectedTestIds(supportedIds);
+    if (availableStoredSelection.length !== storedSelectedTestIds.length) {
+      const nextSelection = availableStoredSelection.length > 0
+        ? availableStoredSelection
+        : defaultSelectedIds;
+      setSelectedTestIds(nextSelection);
+      persistSelectedTestIds(nextSelection);
       return;
     }
 

@@ -30,24 +30,6 @@ export function TestSettingsModal({
     }
   }, [isOpen, selectedTestIds]);
 
-  // Auto-unselect internal tests by default
-  useEffect(() => {
-    if (!isOpen) return;
-    const internalTestIds = tests.filter(isInternalTest).map(t => t.id);
-    if (internalTestIds.length === 0) return;
-
-    setDraftSelection(prev => {
-      const filtered = prev.filter(id => !internalTestIds.includes(id));
-      // Show warning if any internal tests were removed
-      if (filtered.length < prev.length) {
-        setShowInternalWarning(true);
-      }
-      return filtered;
-    });
-    // Only run on mount when modal opens
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
   function handleSave() {
     const hasInternalSelected = draftSelection.some(id => {
       const test = tests.find(t => t.id === id);
