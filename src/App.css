@@ -609,6 +609,10 @@
   height: auto;
 }
 
+.logo-image-mobile {
+  display: none;
+}
+
 .active-link {
   position: relative;
   color: var(--text-1) !important;
@@ -732,6 +736,14 @@
   min-width: 188px;
 }
 
+.topbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
 .nav {
   display: flex;
   gap: 14px;
@@ -757,6 +769,33 @@
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+
+.menu-toggle-bar {
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.menu-toggle.is-open .menu-toggle-bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.menu-toggle.is-open .menu-toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.is-open .menu-toggle-bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 .topbar-login {
@@ -840,8 +879,81 @@ input:focus, textarea:focus, select:focus {
     min-width: auto;
   }
 
-  .nav {
+  .logo-image-desktop {
     display: none;
+  }
+
+  .logo-image-mobile {
+    display: block;
+    width: 44px;
+    height: 44px;
+  }
+
+  .topbar {
+    position: sticky;
+  }
+
+  .topbar-inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .topbar-menu {
+    display: none;
+    width: 100%;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-top: 8px;
+  }
+
+  .topbar-menu.is-open {
+    display: flex;
+  }
+
+  .nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .nav a {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+
+  .settings-btn,
+  .topbar-login,
+  .actions .btn {
+    margin-right: 0;
+  }
+
+  .actions .btn-icon {
+    width: 100%;
+    height: 42px;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 14px;
+  }
+
+  .settings-btn-label {
+    display: inline;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
   }
 
   .input-group {
@@ -880,6 +992,10 @@ input:focus, textarea:focus, select:focus {
 
 .settings-btn {
   margin-right: 8px;
+}
+
+.settings-btn-label {
+  display: none;
 }
 
 .tests-info {
