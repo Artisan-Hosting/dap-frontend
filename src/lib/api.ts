@@ -8,7 +8,7 @@ import type {
   RunState,
 } from '../types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://127.0.0.1:3000');
 
 const TERMINAL_RUN_STATES: Set<RunState> = new Set([
   'completed',
