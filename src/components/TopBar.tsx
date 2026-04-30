@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
+import { trackEvent } from '../lib/analytics';
 import artisanLockupDark from '../assets/branding/artisan-studios__lockup__dark__2048w.webp';
 import artisanLockupLight from '../assets/branding/artisan-studios__lockup__light__2048w.webp';
 
@@ -11,6 +12,7 @@ interface TopBarProps {
 
 const LIGHT_THEME_ICON_URL = '/branding/artisan-studios__mark__dark__1024.webp';
 const DARK_THEME_ICON_URL = '/branding/artisan-studios__mark__light__1024.webp';
+const MOBILE_NAV_MEDIA_QUERY = '(max-width: 1100px)';
 
 export function TopBar({ children, onOpenSettings }: TopBarProps) {
   const { theme } = useTheme();
@@ -23,6 +25,31 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
   React.useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia(MOBILE_NAV_MEDIA_QUERY);
+    const handleViewportChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      if (!event.matches) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    handleViewportChange(mediaQuery);
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      const listener = (event: MediaQueryListEvent) => handleViewportChange(event);
+      mediaQuery.addEventListener('change', listener);
+      return () => mediaQuery.removeEventListener('change', listener);
+    }
+
+    const legacyListener = (event: MediaQueryListEvent) => handleViewportChange(event);
+    mediaQuery.addListener(legacyListener);
+    return () => mediaQuery.removeListener(legacyListener);
+  }, []);
 
   React.useEffect(() => {
     const faviconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
@@ -52,7 +79,13 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
 
         <button
           className={`btn-icon menu-toggle ${isMobileMenuOpen ? 'is-open' : ''}`}
-          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          onClick={() => {
+            const nextOpenState = !isMobileMenuOpen;
+            trackEvent('Mobile Menu Toggled', {
+              is_open: nextOpenState,
+            });
+            setIsMobileMenuOpen(nextOpenState);
+          }}
           aria-expanded={isMobileMenuOpen}
           aria-controls="primary-menu"
           aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -68,14 +101,24 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
             <Link
               to="/"
               className={location.pathname === '/' ? 'active-link' : ''}
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => {
+                trackEvent('Navigation Clicked', {
+                  destination: 'audit',
+                });
+                setIsMobileMenuOpen(false);
+              }}
             >
               Audit
             </Link>
             <Link
               to="/history"
               className={location.pathname === '/history' ? 'active-link' : ''}
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => {
+                trackEvent('Navigation Clicked', {
+                  destination: 'history',
+                });
+                setIsMobileMenuOpen(false);
+              }}
             >
               History
             </Link>
@@ -86,6 +129,9 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
               <button
                 className="btn-icon settings-btn"
                 onClick={() => {
+                  trackEvent('Settings Opened', {
+                    source: 'topbar',
+                  });
                   setIsMobileMenuOpen(false);
                   onOpenSettings();
                 }}
@@ -102,6 +148,7 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
             <button
               className="btn btn-ghost topbar-login"
               onClick={() => {
+                trackEvent('Login Clicked');
                 setIsMobileMenuOpen(false);
                 setIsLoginModalOpen(true);
               }}
@@ -115,11 +162,28 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
       </div>
 
       {isLoginModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsLoginModalOpen(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            trackEvent('Login Modal Closed', {
+              action: 'overlay',
+            });
+            setIsLoginModalOpen(false);
+          }}
+        >
           <div className="modal-content contact-modal" onClick={(event) => event.stopPropagation()}>
             <div className="modal-header">
               <h3>Login coming soon</h3>
-              <button className="modal-close" onClick={() => setIsLoginModalOpen(false)} type="button">
+              <button
+                className="modal-close"
+                onClick={() => {
+                  trackEvent('Login Modal Closed', {
+                    action: 'close_button',
+                  });
+                  setIsLoginModalOpen(false);
+                }}
+                type="button"
+              >
                 ✕
               </button>
             </div>
@@ -128,7 +192,16 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
               <p>
                 We're still building the login experience. For now, everything on this site remains available without an account.
               </p>
-              <button className="btn btn-primary" onClick={() => setIsLoginModalOpen(false)} type="button">
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  trackEvent('Login Modal Closed', {
+                    action: 'primary_button',
+                  });
+                  setIsLoginModalOpen(false);
+                }}
+                type="button"
+              >
                 Close
               </button>
             </div>

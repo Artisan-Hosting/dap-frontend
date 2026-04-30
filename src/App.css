@@ -771,7 +771,7 @@
   align-items: center;
 }
 
-.menu-toggle {
+.btn-icon.menu-toggle {
   display: none;
   flex-direction: column;
   gap: 4px;
@@ -800,6 +800,24 @@
 
 .topbar-login {
   white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .logo-image-desktop {
+    width: 164px;
+  }
+
+  .topbar-menu {
+    gap: 10px;
+  }
+
+  .nav {
+    gap: 10px;
+  }
+
+  .actions {
+    gap: 8px;
+  }
 }
 
 .grow {
@@ -874,7 +892,7 @@ input:focus, textarea:focus, select:focus {
   font-weight: 650;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .brand {
     min-width: auto;
   }
@@ -952,7 +970,7 @@ input:focus, textarea:focus, select:focus {
     display: inline;
   }
 
-  .menu-toggle {
+  .btn-icon.menu-toggle {
     display: inline-flex;
   }
 
