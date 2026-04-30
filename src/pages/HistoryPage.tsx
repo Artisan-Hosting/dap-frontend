@@ -3,6 +3,7 @@ import TopBar from '../components/TopBar';
 import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../hooks/useTheme';
 import { useRunHistory } from '../hooks/useRunHistory';
+import { trackEvent } from '../lib/analytics';
 import '../styles/tokens.css';
 import '../App.css';
 import { useEffect } from 'react';
@@ -19,6 +20,7 @@ export function HistoryPage() {
 
   const handleDelete = (runId: string) => {
     if (window.confirm('Are you sure you want to delete this audit from history?')) {
+      trackEvent('History Entry Deleted');
       deleteRun(runId);
     }
   };
@@ -44,7 +46,15 @@ export function HistoryPage() {
                 No audit history yet. Start by running your first audit!
               </p>
               <div style={{ textAlign: 'center', marginTop: '16px' }}>
-                <button className="btn btn-primary" onClick={() => navigate('/')}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    trackEvent('Back To Audit Clicked', {
+                      source: 'history_empty_state',
+                    });
+                    navigate('/');
+                  }}
+                >
                   Run Audit
                 </button>
               </div>
@@ -70,7 +80,12 @@ export function HistoryPage() {
                   <div className="history-actions">
                     <button
                       className="btn btn-small"
-                      onClick={() => navigate(`/report/${run.runId}`)}
+                      onClick={() => {
+                        trackEvent('History Report Opened', {
+                          cache_hit: run.cacheHit,
+                        });
+                        navigate(`/report/${run.runId}`);
+                      }}
                     >
                       View Report
                     </button>

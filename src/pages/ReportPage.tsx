@@ -6,6 +6,7 @@ import TopBar from '../components/TopBar';
 import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../hooks/useTheme';
 import { useRunHistory } from '../hooks/useRunHistory';
+import { trackEvent } from '../lib/analytics';
 import {
   submitContactRequest,
   type ContactRequestFormValues,
@@ -43,7 +44,18 @@ export function ReportPage() {
       try {
         const rep = await getRunReport(runId);
         setReport(rep);
+        trackEvent('Report Loaded', {
+          cache_hit: rep.run.cache_hit,
+          result_count: rep.results.length,
+          site_profile_count: rep.site_profiles.length,
+          dead_host_count: rep.dead_hosts.length,
+          pass_count: rep.summary.result_counts.pass,
+          warn_count: rep.summary.result_counts.warn,
+          fail_count: rep.summary.result_counts.fail,
+          error_count: rep.summary.result_counts.error,
+        });
       } catch (err) {
+        trackEvent('Report Load Failed');
         setError((err as Error).message);
       } finally {
         setLoading(false);
@@ -110,7 +122,15 @@ export function ReportPage() {
             <div className="hero-content">
               <h2>Report Not Found</h2>
               <p>{error || 'Unable to load the report for this run.'}</p>
-              <button className="btn btn-primary" onClick={() => navigate('/')}>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  trackEvent('Back To Audit Clicked', {
+                    source: 'report_error_state',
+                  });
+                  navigate('/');
+                }}
+              >
                 Back to Audit
               </button>
             </div>
@@ -169,7 +189,13 @@ export function ReportPage() {
 
               <button
                 className="btn btn-primary result-cta"
-                onClick={() => setIsContactModalOpen(true)}
+                onClick={() => {
+                  trackEvent('Contact CTA Clicked', {
+                    source: 'report_page',
+                    cache_hit: report.run.cache_hit,
+                  });
+                  setIsContactModalOpen(true);
+                }}
                 type="button"
               >
                 Want a human to look at it?
@@ -198,7 +224,13 @@ export function ReportPage() {
             <div className="results-card dead-hosts">
               <button
                 className="subdomain-header-btn"
-                onClick={() => setDeadHostsExpanded(!deadHostsExpanded)}
+                onClick={() => {
+                  trackEvent('Dead Hosts Toggled', {
+                    expanded: !deadHostsExpanded,
+                    dead_host_count: report.dead_hosts.length,
+                  });
+                  setDeadHostsExpanded(!deadHostsExpanded);
+                }}
                 style={{ width: '100%', marginBottom: deadHostsExpanded ? '12px' : '0' }}
               >
                 <span className="expand-icon">{deadHostsExpanded ? '▼' : '▶'}</span>
@@ -221,25 +253,53 @@ export function ReportPage() {
            <div className="results-card results-card-wide">
              <h3>Test Results ({report.results.length})</h3>
              <ResultsByTarget
-               onViewRawEvidence={(content, title) => setEvidenceModal({ content, title })}
+               onViewRawEvidence={(content, title) => {
+                 trackEvent('Raw Evidence Opened', {
+                   title_length: title.length,
+                 });
+                 setEvidenceModal({ content, title });
+               }}
                results={report.results}
              />
            </div>
 
            <button
              className="btn btn-secondary"
-             onClick={() => navigate('/')}
+             onClick={() => {
+               trackEvent('Back To Audit Clicked', {
+                 source: 'report_page',
+               });
+               navigate('/');
+             }}
            >
              Back to Audit
            </button>
          </section>
 
         {evidenceModal && (
-          <div className="modal-overlay" onClick={() => setEvidenceModal(null)}>
+          <div
+            className="modal-overlay"
+            onClick={() => {
+              trackEvent('Raw Evidence Closed', {
+                action: 'overlay',
+              });
+              setEvidenceModal(null);
+            }}
+          >
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h3>{evidenceModal.title}</h3>
-                <button className="modal-close" onClick={() => setEvidenceModal(null)}>✕</button>
+                <button
+                  className="modal-close"
+                  onClick={() => {
+                    trackEvent('Raw Evidence Closed', {
+                      action: 'close_button',
+                    });
+                    setEvidenceModal(null);
+                  }}
+                >
+                  ✕
+                </button>
               </div>
               <pre className="modal-evidence">{JSON.stringify(evidenceModal.content, null, 2)}</pre>
             </div>

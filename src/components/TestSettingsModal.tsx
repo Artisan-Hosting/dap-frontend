@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { SupportedTest } from '../types/api';
+import { trackEvent } from '../lib/analytics';
 
 interface TestSettingsModalProps {
   isOpen: boolean;
@@ -11,6 +12,17 @@ interface TestSettingsModalProps {
 
 function isInternalTest(test: SupportedTest): boolean {
   return test.category === 'internal' || test.runtime === 'internal';
+}
+
+function getSelectionSummary(selectedIds: string[], tests: SupportedTest[]) {
+  const internalIds = new Set(tests.filter(isInternalTest).map((test) => test.id));
+  const internalSelectedCount = selectedIds.filter((testId) => internalIds.has(testId)).length;
+
+  return {
+    selected_count: selectedIds.length,
+    available_count: tests.length,
+    internal_selected_count: internalSelectedCount,
+  };
 }
 
 export function TestSettingsModal({
@@ -37,10 +49,18 @@ export function TestSettingsModal({
     });
 
     if (hasInternalSelected) {
+      trackEvent('Test Selection Warning Shown', {
+        warning_type: 'internal_tests',
+        ...getSelectionSummary(draftSelection, tests),
+      });
       setShowInternalWarning(true);
       return;
     }
 
+    trackEvent('Test Selection Saved', {
+      save_mode: 'normal',
+      ...getSelectionSummary(draftSelection, tests),
+    });
     onSave(draftSelection.filter((testId) => supportedTestIds.includes(testId)));
     onClose();
   }
@@ -70,6 +90,10 @@ export function TestSettingsModal({
               <button
                 className="btn btn-primary"
                 onClick={() => {
+                  trackEvent('Test Selection Saved', {
+                    save_mode: 'run_anyway',
+                    ...getSelectionSummary(draftSelection, tests),
+                  });
                   setShowInternalWarning(false);
                   onSave(draftSelection.filter((testId) => supportedTestIds.includes(testId)));
                   onClose();
@@ -86,11 +110,21 @@ export function TestSettingsModal({
   }
 
   function toggleTest(testId: string) {
-    setDraftSelection((current) =>
-      current.includes(testId)
+    setDraftSelection((current) => {
+      const nextSelection = current.includes(testId)
         ? current.filter((selectedId) => selectedId !== testId)
-        : [...current, testId]
-    );
+        : [...current, testId];
+      const test = tests.find((candidate) => candidate.id === testId);
+
+      trackEvent('Test Toggled', {
+        test_id: testId,
+        test_runtime: test?.runtime ?? 'unknown',
+        selected: !current.includes(testId),
+        ...getSelectionSummary(nextSelection, tests),
+      });
+
+      return nextSelection;
+    });
   }
 
   return (
@@ -115,12 +149,28 @@ export function TestSettingsModal({
             <div className="settings-toolbar-actions">
               <button
                 className="btn btn-small"
-                onClick={() => setDraftSelection(supportedTestIds)}
+                onClick={() => {
+                  trackEvent('Test Selection Bulk Updated', {
+                    action: 'select_all',
+                    ...getSelectionSummary(supportedTestIds, tests),
+                  });
+                  setDraftSelection(supportedTestIds);
+                }}
                 type="button"
               >
                 Select All
               </button>
-              <button className="btn btn-small" onClick={() => setDraftSelection([])} type="button">
+              <button
+                className="btn btn-small"
+                onClick={() => {
+                  trackEvent('Test Selection Bulk Updated', {
+                    action: 'clear_all',
+                    ...getSelectionSummary([], tests),
+                  });
+                  setDraftSelection([]);
+                }}
+                type="button"
+              >
                 Clear All
               </button>
             </div>

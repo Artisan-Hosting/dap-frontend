@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ResultEvidence from './ResultEvidence';
 import type { Result, TestStatus } from '../types/api';
+import { trackEvent } from '../lib/analytics';
 
 const TEST_DISPLAY_NAMES: Record<string, string> = {
   web_basic_surface: 'Web Surface',
@@ -562,6 +563,11 @@ export function ResultsByTarget({ results, onViewRawEvidence }: ResultsByTargetP
                   } else {
                     nextExpanded.add(subdomain);
                   }
+                  trackEvent('Subdomain Results Toggled', {
+                    expanded: !isExpanded,
+                    result_count: targetResults.length,
+                    grouped_test_count: groupedResults.length,
+                  });
                   setExpandedSubdomains(nextExpanded);
                 }}
                 type="button"
@@ -580,7 +586,14 @@ export function ResultsByTarget({ results, onViewRawEvidence }: ResultsByTargetP
               {isExpanded && (
                 <SubdomainResultsMasonry
                   groupedResults={groupedResults}
-                  onOpenGroup={(group) => setGroupedResultsModal({ subdomain, group })}
+                  onOpenGroup={(group) => {
+                    trackEvent('Grouped Result Opened', {
+                      test_id: group.testId,
+                      item_count: group.results.length,
+                      aggregate_status: group.aggregateStatus,
+                    });
+                    setGroupedResultsModal({ subdomain, group });
+                  }}
                   subdomain={subdomain}
                 />
               )}
@@ -590,7 +603,17 @@ export function ResultsByTarget({ results, onViewRawEvidence }: ResultsByTargetP
       </div>
 
       {groupedResultsModal && (
-        <div className="modal-overlay" onClick={() => setGroupedResultsModal(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            trackEvent('Grouped Result Closed', {
+              action: 'overlay',
+              test_id: groupedResultsModal.group.testId,
+              item_count: groupedResultsModal.group.results.length,
+            });
+            setGroupedResultsModal(null);
+          }}
+        >
           <div
             className="modal-content grouped-results-modal"
             onClick={(event) => event.stopPropagation()}
@@ -601,7 +624,13 @@ export function ResultsByTarget({ results, onViewRawEvidence }: ResultsByTargetP
               </h3>
               <button
                 className="modal-close"
-                onClick={() => setGroupedResultsModal(null)}
+                onClick={() => {
+                  trackEvent('Grouped Result Closed', {
+                    test_id: groupedResultsModal.group.testId,
+                    item_count: groupedResultsModal.group.results.length,
+                  });
+                  setGroupedResultsModal(null);
+                }}
                 type="button"
               >
                 ✕

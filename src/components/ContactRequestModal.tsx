@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import type { ContactRequestFormValues } from '../lib/contactRequest';
+import { trackEvent } from '../lib/analytics';
 
 interface ContactRequestModalProps {
   isOpen: boolean;
@@ -34,7 +35,10 @@ export function ContactRequestModal({
       setIsSubmitting(false);
       setIsSubmitted(false);
       setSubmitError(null);
+      return;
     }
+
+    trackEvent('Contact Modal Opened');
   }, [isOpen]);
 
   if (!isOpen) {
@@ -47,23 +51,47 @@ export function ContactRequestModal({
     event.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
+    trackEvent('Contact Request Submitted', {
+      has_company_name: formValues.companyName.trim().length > 0,
+      reason_length: formValues.reasonOrGoal.trim().length,
+      name_length: formValues.name.trim().length,
+    });
 
     try {
       await onSubmit(formValues);
       setIsSubmitted(true);
+      trackEvent('Contact Request Succeeded');
     } catch (error) {
       setSubmitError((error as Error).message || 'Unable to submit request.');
+      trackEvent('Contact Request Failed');
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div
+      className="modal-overlay"
+      onClick={() => {
+        trackEvent('Contact Modal Closed', {
+          action: 'overlay',
+        });
+        onClose();
+      }}
+    >
       <div className="modal-content contact-modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal-header">
           <h3>Want a human to look at it?</h3>
-          <button className="modal-close" onClick={onClose} type="button">
+          <button
+            className="modal-close"
+            onClick={() => {
+              trackEvent('Contact Modal Closed', {
+                action: 'close_button',
+              });
+              onClose();
+            }}
+            type="button"
+          >
             ✕
           </button>
         </div>
@@ -74,14 +102,32 @@ export function ContactRequestModal({
             <p className="contact-copy">
               This request is outside the scope of the follow-up service for this audit.
             </p>
-            <button className="btn btn-primary" onClick={onClose} type="button">
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                trackEvent('Contact Modal Closed', {
+                  action: 'blocked_close',
+                });
+                onClose();
+              }}
+              type="button"
+            >
               Close
             </button>
           </div>
         ) : isSubmitted ? (
           <div className="contact-success">
             <p>Thanks. We'll follow up about this audit.</p>
-            <button className="btn btn-primary" onClick={onClose} type="button">
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                trackEvent('Contact Modal Closed', {
+                  action: 'success_close',
+                });
+                onClose();
+              }}
+              type="button"
+            >
               Close
             </button>
           </div>
@@ -147,7 +193,16 @@ export function ContactRequestModal({
             {submitError && <div className="error-message">{submitError}</div>}
 
             <div className="contact-actions">
-              <button className="btn btn-secondary" onClick={onClose} type="button">
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  trackEvent('Contact Modal Closed', {
+                    action: 'cancel',
+                  });
+                  onClose();
+                }}
+                type="button"
+              >
                 Cancel
               </button>
               <button className="btn btn-primary" disabled={isSubmitting} type="submit">

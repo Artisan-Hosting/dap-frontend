@@ -7,6 +7,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useRunHistory } from '../hooks/useRunHistory';
 import { isBlockedContactTarget } from '../lib/contactRequest';
 import { getAuditLimitEnabled, getAuditLimitMax } from '../lib/auditLimit';
+import { summarizeTarget, trackEvent } from '../lib/analytics';
 
 // Hard audit limit toggle, with optional window overrides for local testing.
 const AUDIT_LIMIT_ENABLED: boolean = getAuditLimitEnabled();
@@ -160,6 +161,7 @@ function AuditPage() {
     // Find the most recent run that might still be in progress
     const mostRecent = history[0];
     if (mostRecent && !mostRecent.done) {
+      trackEvent('Audit Recovered From History');
       // Attempt to recover by setting the runId so polling can resume
       setRunId(mostRecent.runId);
       setRunState('queued');
@@ -217,8 +219,16 @@ function AuditPage() {
       try {
         const response = await listSupportedTests();
         setSupportedTests(response.tests);
+        if (!hasTrackedTestsLoadedRef.current) {
+          hasTrackedTestsLoadedRef.current = true;
+          trackEvent('Supported Tests Loaded', {
+            test_count: response.tests.length,
+            internal_test_count: response.tests.filter(isInternalDiscoveryAddon).length,
+          });
+        }
       } catch (err) {
         console.error('Failed to fetch supported tests:', err);
+        trackEvent('Supported Tests Load Failed');
       } finally {
         setTestsLoading(false);
       }
@@ -234,6 +244,25 @@ function AuditPage() {
   const [connectionErrorIndex, setConnectionErrorIndex] = useState(0);
   const retryCountRef = useRef(0);
   const retryCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasTrackedTestsLoadedRef = useRef(false);
+  const lastTrackedTerminalStateRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!runId || !runState || !isTerminalState(runState)) {
+      return;
+    }
+
+    const trackingKey = `${runId}:${runState}`;
+    if (lastTrackedTerminalStateRef.current === trackingKey) {
+      return;
+    }
+
+    lastTrackedTerminalStateRef.current = trackingKey;
+    trackEvent('Audit Terminal State Reached', {
+      state: runState,
+      selected_test_count: selectedTestIds.length,
+    });
+  }, [runId, runState, selectedTestIds.length]);
 
   useEffect(() => {
     if (!runId || (runState !== null && isTerminalState(runState))) {
@@ -274,6 +303,10 @@ function AuditPage() {
         if (isNetworkError) {
           retryCountRef.current += 1;
           const backoffMs = Math.min(2000 * Math.pow(1.5, retryCountRef.current - 1), 30000);
+          trackEvent('Audit Poll Retry Scheduled', {
+            retry_attempt: retryCountRef.current,
+            retry_delay_ms: backoffMs,
+          });
           setIsConnectionError(true);
           setRetryRemainingMs(backoffMs);
           setConnectionErrorIndex((prev) => (prev + 1) % CONNECTION_ERROR_TEXTS.length);
@@ -301,6 +334,9 @@ function AuditPage() {
             }
           }, backoffMs);
         } else {
+          trackEvent('Audit Poll Failed', {
+            status_code: apiError.statusCode ?? 0,
+          });
           setError(apiError.message || 'Server error occurred');
           setRunState('failed');
           clearInterval(pollInterval);
@@ -325,6 +361,10 @@ function AuditPage() {
 
     const trimmedTarget = target.trim().toLowerCase();
     if (isBlockedContactTarget(trimmedTarget)) {
+      trackEvent('Audit Submission Blocked', {
+        reason: 'blocked_target',
+        ...summarizeTarget(trimmedTarget),
+      });
       setError("That looks like a lot of work, I'll pass.");
       setRunState(null);
       return;
@@ -339,20 +379,32 @@ function AuditPage() {
     try {
       // Check if user has reached the hard audit limit
       if (typeof AUDIT_LIMIT_ENABLED !== 'undefined' && AUDIT_LIMIT_ENABLED && history.length >= AUDIT_LIMIT_MAX) {
+        trackEvent('Audit Submission Blocked', {
+          reason: 'audit_limit',
+          audit_limit: AUDIT_LIMIT_MAX,
+          history_count: history.length,
+        });
         setIsAuditLimitModalOpen(true);
         setRunState(null);
         return;
       }
 
+      trackEvent('Audit Submitted', {
+        selected_test_count: selectedTestIds.length,
+        includes_internal_tests: selectedTestIds.some((testId) =>
+          supportedTests.some((test) => test.id === testId && isInternalDiscoveryAddon(test))
+        ),
+        ...summarizeTarget(trimmedTarget),
+      });
       const result: CreateRunResponse = await createRun({
-        target: target.trim().toLowerCase(),
+        target: trimmedTarget,
         requested_tests: selectedTestIds,
       });
 
       // Persist runId immediately so we can recover if connection drops
       addRun({
         runId: result.run_id,
-        target: target.trim().toLowerCase(),
+        target: trimmedTarget,
         timestamp: Date.now(),
         cacheHit: false,
         done: false,
@@ -369,6 +421,7 @@ function AuditPage() {
         }
       }
     } catch (err) {
+      trackEvent('Audit Submission Failed');
       setError((err as Error).message);
       setRunState('failed');
     }
@@ -462,7 +515,12 @@ function AuditPage() {
                   {history.length > 5 && (
                     <button 
                       className="btn btn-small" 
-                      onClick={() => navigate('/history')}
+                      onClick={() => {
+                        trackEvent('History Navigation Clicked', {
+                          source: 'audit_page_recent_runs',
+                        });
+                        navigate('/history');
+                      }}
                     >
                       View All ({history.length})
                     </button>
@@ -473,7 +531,13 @@ function AuditPage() {
                     <button 
                       key={run.runId} 
                       className="recent-run-item" 
-                      onClick={() => navigate(`/report/${run.runId}`)}
+                      onClick={() => {
+                        trackEvent('Recent Audit Opened', {
+                          source: 'audit_page_recent_runs',
+                          cache_hit: run.cacheHit,
+                        });
+                        navigate(`/report/${run.runId}`);
+                      }}
                       style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
                     >
                       <div className="run-target">{run.target}</div>
@@ -561,11 +625,28 @@ function AuditPage() {
         )}
 
           {isAuditLimitModalOpen && (
-            <div className="modal-overlay" onClick={() => setIsAuditLimitModalOpen(false)}>
+            <div
+              className="modal-overlay"
+              onClick={() => {
+                trackEvent('Audit Limit Modal Closed', {
+                  action: 'overlay',
+                });
+                setIsAuditLimitModalOpen(false);
+              }}
+            >
               <div className="modal-content contact-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                   <h3>You've hit the {AUDIT_LIMIT_MAX}-audit cap.</h3>
-                  <button className="modal-close" onClick={() => setIsAuditLimitModalOpen(false)} type="button">
+                  <button
+                    className="modal-close"
+                    onClick={() => {
+                      trackEvent('Audit Limit Modal Closed', {
+                        action: 'close_button',
+                      });
+                      setIsAuditLimitModalOpen(false);
+                    }}
+                    type="button"
+                  >
                     ✕
                   </button>
                 </div>
@@ -574,12 +655,24 @@ function AuditPage() {
                     You've already used all {AUDIT_LIMIT_MAX} anonymous audit{AUDIT_LIMIT_MAX === 1 ? '' : 's'}. Make an account to keep running audits, or send one to our team so we can help you make a plan.
                   </p>
                   <div className="contact-actions">
-                    <button className="btn btn-secondary" onClick={() => setIsAuditLimitModalOpen(false)} type="button">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        trackEvent('Audit Limit Modal Closed', {
+                          action: 'maybe_later',
+                        });
+                        setIsAuditLimitModalOpen(false);
+                      }}
+                      type="button"
+                    >
                       Maybe Later
                     </button>
                     <button 
                       className="btn btn-primary" 
                       onClick={() => {
+                        trackEvent('Audit Limit Modal Closed', {
+                          action: 'acknowledged',
+                        });
                         setIsAuditLimitModalOpen(false);
                       }}
                       type="button"

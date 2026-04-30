@@ -1,4 +1,5 @@
 import { useTheme } from '../hooks/useTheme';
+import { trackEvent } from '../lib/analytics';
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -6,7 +7,13 @@ export function ThemeToggle() {
   return (
     <button
       className="btn btn-ghost"
-      onClick={toggleTheme}
+      onClick={() => {
+        trackEvent('Theme Toggled', {
+          current_theme: theme,
+          next_theme: theme === 'light' ? 'dark' : 'light',
+        });
+        toggleTheme();
+      }}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       <span
