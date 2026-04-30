@@ -6,10 +6,11 @@ import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../hooks/useTheme';
 import { useRunHistory } from '../hooks/useRunHistory';
 import { isBlockedContactTarget } from '../lib/contactRequest';
+import { getAuditLimitEnabled, getAuditLimitMax } from '../lib/auditLimit';
 
-// Hard audit limit toggle (defined in App.tsx)
-const AUDIT_LIMIT_ENABLED: boolean = (window as any).AUDIT_LIMIT_ENABLED ?? true;
-const AUDIT_LIMIT_MAX: number = (window as any).AUDIT_LIMIT_MAX ?? 40;
+// Hard audit limit toggle, with optional window overrides for local testing.
+const AUDIT_LIMIT_ENABLED: boolean = getAuditLimitEnabled();
+const AUDIT_LIMIT_MAX: number = getAuditLimitMax();
 import {
   listSupportedTests,
   createRun,
@@ -403,9 +404,16 @@ function AuditPage() {
               {testsLoading ? (
                 <p className="tests-info">Loading available tests...</p>
               ) : (
-                <p className="tests-info">
-                  {selectedTestIds.length} of {supportedTests.length} test{supportedTests.length !== 1 ? 's' : ''} selected
-                </p>
+                <>
+                  <p className="tests-info">
+                    {selectedTestIds.length} of {supportedTests.length} test{supportedTests.length !== 1 ? 's' : ''} selected
+                  </p>
+                  {AUDIT_LIMIT_ENABLED && (
+                    <p className="tests-info">
+                      Anonymous usage is capped at {AUDIT_LIMIT_MAX} audit{AUDIT_LIMIT_MAX === 1 ? '' : 's'}.
+                    </p>
+                  )}
+                </>
               )}
 
               <form onSubmit={handleSubmit} className="domain-form">
@@ -544,14 +552,14 @@ function AuditPage() {
             <div className="modal-overlay" onClick={() => setIsAuditLimitModalOpen(false)}>
               <div className="modal-content contact-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                  <h3>You've ran 40 audits!</h3>
+                  <h3>You've hit the {AUDIT_LIMIT_MAX}-audit cap.</h3>
                   <button className="modal-close" onClick={() => setIsAuditLimitModalOpen(false)} type="button">
                     ✕
                   </button>
                 </div>
                 <div className="contact-form">
                   <p className="contact-copy">
-                    You know you've ran 40 audits! Consider making an account to keep running these or send an audit over to our team so we can make a plan to help you.
+                    You've already used all {AUDIT_LIMIT_MAX} anonymous audit{AUDIT_LIMIT_MAX === 1 ? '' : 's'}. Make an account to keep running audits, or send one to our team so we can help you make a plan.
                   </p>
                   <div className="contact-actions">
                     <button className="btn btn-secondary" onClick={() => setIsAuditLimitModalOpen(false)} type="button">

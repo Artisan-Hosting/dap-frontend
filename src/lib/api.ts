@@ -8,7 +8,21 @@ import type {
   RunState,
 } from '../types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://127.0.0.1:3000');
+function normalizeApiBaseUrl(value: string): string {
+  return value.replace(/\/+$/, '');
+}
+
+function resolveApiBaseUrl(): string {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (configuredBaseUrl) {
+    return normalizeApiBaseUrl(configuredBaseUrl);
+  }
+
+  // Default to the same-origin API path unless an explicit deploy-time URL is provided.
+  return '/api';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const TERMINAL_RUN_STATES: Set<RunState> = new Set([
   'completed',
@@ -67,7 +81,16 @@ async function requestJson<T>(
     clearTimeout(timeoutId);
 
     const text = await response.text();
-    const parsed = text ? JSON.parse(text) : {};
+    const contentType = response.headers.get('content-type') ?? '';
+    let parsed: unknown = {};
+
+    if (text) {
+      if (contentType.includes('application/json')) {
+        parsed = JSON.parse(text);
+      } else {
+        parsed = { message: text };
+      }
+    }
 
     if (!response.ok) {
       throw new ApiError(response.status, url, parsed);

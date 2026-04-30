@@ -3,10 +3,11 @@ import TopBar from './components/TopBar';
 import ThemeToggle from './components/ThemeToggle';
 import { useTheme } from './hooks/useTheme';
 import { useRunHistory } from './hooks/useRunHistory';
+import { DEFAULT_AUDIT_LIMIT_ENABLED, DEFAULT_AUDIT_LIMIT_MAX } from './lib/auditLimit';
 
 // Toggle for hard cap on audit count (for testing)
-(window as any).AUDIT_LIMIT_ENABLED = false;
-(window as any).AUDIT_LIMIT_MAX = 50;
+(window as any).AUDIT_LIMIT_ENABLED = DEFAULT_AUDIT_LIMIT_ENABLED;
+(window as any).AUDIT_LIMIT_MAX = DEFAULT_AUDIT_LIMIT_MAX;
 import { Footer } from './components/Footer';
 import {
   listSupportedTests,
