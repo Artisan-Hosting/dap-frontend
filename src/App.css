@@ -1616,6 +1616,7 @@ input:focus, textarea:focus, select:focus {
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  overflow-y: auto;
 }
 
 .modal-content {
@@ -1720,6 +1721,11 @@ input:focus, textarea:focus, select:focus {
   flex-direction: column;
   gap: 16px;
   padding: 20px;
+}
+
+.contact-form,
+.contact-success {
+  overflow-y: auto;
 }
 
 .contact-success p,
@@ -1860,9 +1866,83 @@ input:focus, textarea:focus, select:focus {
     flex-direction: column;
   }
 
+  .result-summary {
+    gap: 8px;
+    flex: 1 1 auto;
+  }
+
+  .summary-item {
+    min-width: 68px;
+    padding: 10px 14px;
+    border-radius: 12px;
+  }
+
+  .summary-count {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .summary-label {
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
   .result-cta {
     width: 100%;
     min-width: 0;
+  }
+
+  .subdomain-group {
+    margin-bottom: 12px;
+  }
+
+  .subdomain-header-btn {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .subdomain-results {
+    margin-left: 0;
+    padding: 8px 0 0 10px;
+    gap: 8px;
+  }
+
+  .subdomain-results-column {
+    gap: 8px;
+  }
+
+  .result-item {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+  }
+
+  .result-header {
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+
+  .result-test {
+    font-size: 13px;
+  }
+
+  .result-status {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  .result-severity,
+  .result-group-copy,
+  .result-notes,
+  .recommendation {
+    font-size: 12px;
+  }
+
+  .result-notes,
+  .result-evidence,
+  .result-recommendations {
+    margin-top: 6px;
+    padding-top: 6px;
   }
 
   .history-item {
@@ -1887,5 +1967,27 @@ input:focus, textarea:focus, select:focus {
 
   .settings-list {
     grid-template-columns: 1fr;
+  }
+
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .modal-content {
+    max-height: calc(100dvh - 24px);
+  }
+
+  .contact-modal {
+    max-height: calc(100dvh - 24px);
+  }
+
+  .contact-form,
+  .contact-success,
+  .settings-body,
+  .grouped-results-body,
+  .modal-evidence {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
