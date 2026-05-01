@@ -494,8 +494,16 @@ function AuditPage() {
             <div className="hero-content">
               <h2>Audit your domain</h2>
               <p>
-                Enter a domain to discover subdomains, test DNS configuration,
-                hsts data and more.
+                Run an audit when you want a quick outside-in check of how your
+                domain is set up. It can help you catch forgotten subdomains,
+                DNS or HTTPS issues, and configuration gaps before they turn
+                into bigger problems.
+              </p>
+              <p>
+                The report is meant to be a practical starting point. Passes
+                show what looks healthy, warnings highlight things worth a
+                review, failures call out issues that likely need action, and
+                errors mean a test could not be completed cleanly.
               </p>
 
               {testsLoading ? (
