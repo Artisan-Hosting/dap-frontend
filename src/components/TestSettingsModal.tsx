@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { SupportedTest } from '../types/api';
 import { trackEvent } from '../lib/analytics';
+import { getTestDescription } from '../lib/testCopy';
 
 interface TestSettingsModalProps {
   isOpen: boolean;
@@ -192,6 +193,7 @@ export function TestSettingsModal({
                       <span className="settings-item-name">{test.name}</span>
                       <span className="settings-item-id">{test.id}</span>
                     </div>
+                    <span className="settings-item-description">{getTestDescription(test.id)}</span>
                     <span className="settings-item-meta">
                       {test.category} · {test.runtime} · {test.timeout_seconds}s timeout
                     </span>

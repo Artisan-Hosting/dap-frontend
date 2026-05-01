@@ -2,29 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ResultEvidence from './ResultEvidence';
 import type { Result, TestStatus } from '../types/api';
 import { trackEvent } from '../lib/analytics';
-
-const TEST_DISPLAY_NAMES: Record<string, string> = {
-  web_basic_surface: 'Web Surface',
-  ip_geolocation: 'IP Geolocation',
-  ip_hosting_provider: 'Hosting Provider',
-  web_security_headers: 'Security Headers',
-  ip_reputation_dnsbl: 'IP Reputation',
-  web_hsts: 'HSTS',
-  web_mixed_content: 'Mixed Content',
-  web_seo_basics: 'SEO Basics',
-  dns_cname_chain: 'CNAME Chain',
-  psi_web_performance: 'Performance',
-  email_probe: 'Email Security',
-  ssl_certificate: 'SSL Certificate',
-  dnssec_status: 'DNSSEC',
-  dmarc: 'DMARC',
-  spf: 'SPF',
-  dkim: 'DKIM',
-};
-
-function getTestDisplayName(testId: string): string {
-  return TEST_DISPLAY_NAMES[testId] || testId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+import { getTestDescription, getTestDisplayName } from '../lib/testCopy';
 
 interface ResultsByTargetProps {
   results: Result[];
@@ -420,6 +398,7 @@ function SummaryResultCard({
           ? `${group.results[0].severity} severity`
           : `Grouped from ${itemCount} observed results`}
       </div>
+      <div className="result-description">{getTestDescription(group.testId)}</div>
       <div className="result-group-copy">{getResultCardSummary(group)}</div>
       <div className="result-group-copy">Click to inspect the full test detail.</div>
     </button>
@@ -638,7 +617,10 @@ export function ResultsByTarget({ results, onViewRawEvidence }: ResultsByTargetP
             </div>
 
             <div className="grouped-results-body">
-              <div className="grouped-results-copy">
+             <div className="grouped-results-copy">
+               <p>
+                  {getTestDescription(groupedResultsModal.group.testId)}
+                </p>
                 <p>
                   {getGroupedResultExplanation(
                     groupedResultsModal.group.testId,
