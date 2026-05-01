@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TestSettingsModal from '../components/TestSettingsModal';
 import TopBar from '../components/TopBar';
 import ThemeToggle from '../components/ThemeToggle';
@@ -23,6 +23,11 @@ import type { CreateRunResponse, RunStatusResponse, RunState, SupportedTest } fr
 import '../styles/tokens.css';
 import '../App.css';
 import Footer from '../components/Footer';
+import { setPageSeo, SITE_URL } from '../lib/seo';
+
+const HOME_PAGE_TITLE = 'Website Performance Audit & Technical SEO Tool | Artisan DAP';
+const HOME_PAGE_DESCRIPTION =
+  'Run a website performance audit and technical SEO check for domains and subdomains. Review Core Web Vitals, security headers, DNS, SSL, email, and discovery findings in one report.';
 
 const CONNECTION_ERROR_TEXTS: string[] = [
   "Looks like the internet took a coffee break...",
@@ -185,6 +190,33 @@ function AuditPage() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    setPageSeo({
+      title: HOME_PAGE_TITLE,
+      description: HOME_PAGE_DESCRIPTION,
+      path: '/',
+      structuredData: {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'Artisan DAP',
+        url: SITE_URL,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Any',
+        description:
+          'Website performance and technical SEO audit tool for domains and subdomains.',
+        featureList: [
+          'Website performance auditing',
+          'Core Web Vitals-style performance checks',
+          'Technical SEO auditing',
+          'DNS and SSL checks',
+          'Security header checks',
+          'Subdomain discovery',
+          'Email authentication checks',
+        ],
+      },
+    });
+  }, []);
 
   // Recover runId from storage on mount in case of connection drop
   useEffect(() => {
@@ -490,111 +522,149 @@ function AuditPage() {
 
         <main className="wrap">
           {(!runState || isTerminalState(runState)) && !runId ? (
-          <section className="hero">
-            <div className="hero-content">
-              <h2>Audit your domain</h2>
-              <p>
-                Run an audit when you want a quick outside-in check of how your
-                domain is set up. It can help you catch forgotten subdomains,
-                DNS or HTTPS issues, and configuration gaps before they turn
-                into bigger problems.
-              </p>
-              <p>
-                The report is meant to be a practical starting point. Passes
-                show what looks healthy, warnings highlight things worth a
-                review, failures call out issues that likely need action, and
-                errors mean a test could not be completed cleanly.
-              </p>
+          <>
+            <section className="hero audit-hero">
+              <div className="hero-content">
+                <div className="audit-hero-heading">
+                  <h1>Run a website performance audit and technical SEO check</h1>
+                </div>
 
-              {testsLoading ? (
-                <p className="tests-info">Loading available tests...</p>
-              ) : (
-                <>
-                  <p className="tests-info">
-                    {selectedTestIds.length} of {supportedTests.length} test{supportedTests.length !== 1 ? 's' : ''} selected
+                <div className="audit-hero-copy">
+                  <p>
+                    Audit a domain for page speed, Core Web Vitals-style
+                    performance signals, technical SEO, DNS, SSL, email, and
+                    subdomain exposure. It helps surface issues that can slow down
+                    pages, weaken trust, or reduce search visibility.
                   </p>
-                  {AUDIT_LIMIT_ENABLED && (
-                    <p className="tests-info">
-                      Anonymous usage is capped at {AUDIT_LIMIT_MAX} audit{AUDIT_LIMIT_MAX === 1 ? '' : 's'}.
-                    </p>
-                  )}
-                </>
-              )}
-
-              <form onSubmit={handleSubmit} className="domain-form">
-                <div className="input-group">
-                  <input
-                    type="text"
-                    value={target}
-                    onChange={(e) => setTarget(e.target.value)}
-                    placeholder="totalycooldomain.com"
-                    className="domain-input"
-                    disabled={runState !== null && !isTerminalState(runState) || testsLoading}
-                  />
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={!target.trim() || selectedTestIds.length === 0 || (runState !== null && !isTerminalState(runState)) || testsLoading}
-                  >
-                    Run Audit
-                  </button>
+                  <p>
+                    Think of it as a broader outside-in review: PSI-style
+                    performance insight plus infrastructure, discovery, and
+                    implementation checks in one report.
+                  </p>
+                  <p>
+                    The results are designed to be actionable. Passes show what
+                    looks healthy, warnings point to items worth reviewing,
+                    failures highlight likely problems, and errors mean a test did
+                    not complete cleanly.
+                  </p>
+                  {/* <p className="hero-note">
+                    Heads up: this audit tends to be most reliable on smaller,
+                    simpler domains. In larger environments with many subdomains,
+                    discovery can be partial, so treat the results as useful
+                    guidance rather than a complete inventory.
+                  </p> */}
                 </div>
-              </form>
 
-              {!testsLoading && selectedTestIds.length === 0 && (
-                <div className="error-message">Select at least one test in Settings before running an audit.</div>
-              )}
-
-              {error && <div className="error-message">{error}</div>}
-            </div>
-
-            {history.length > 0 && (
-              <div className="recent-runs-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <h3 style={{ margin: 0 }}>Recent Audits</h3>
-                  {history.length > 5 && (
-                    <button 
-                      className="btn btn-small" 
-                      onClick={() => {
-                        trackEvent('History Navigation Clicked', {
-                          source: 'audit_page_recent_runs',
-                        });
-                        navigate('/history');
-                      }}
-                    >
-                      View All ({history.length})
-                    </button>
+                <div className="audit-hero-form-block">
+                  {testsLoading ? (
+                    <p className="tests-info">Loading available tests...</p>
+                  ) : (
+                    <>
+                      <p className="tests-info">
+                        {selectedTestIds.length} of {supportedTests.length} test{supportedTests.length !== 1 ? 's' : ''} selected
+                      </p>
+                      {AUDIT_LIMIT_ENABLED && (
+                        <p className="tests-info">
+                          Anonymous usage is capped at {AUDIT_LIMIT_MAX} audit{AUDIT_LIMIT_MAX === 1 ? '' : 's'}.
+                        </p>
+                      )}
+                    </>
                   )}
-                </div>
-                <div className="recent-runs-list">
-                  {history.slice(0, 5).map((run) => (
-                    <button 
-                      key={run.runId} 
-                      className="recent-run-item" 
-                      onClick={() => {
-                        trackEvent('Recent Audit Opened', {
-                          source: 'audit_page_recent_runs',
-                          cache_hit: run.cacheHit,
-                        });
-                        navigate(`/report/${run.runId}`);
-                      }}
-                      style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
-                    >
-                      <div className="run-target">{run.target}</div>
-                      <div className="run-meta">
-                        <span className={`run-status ${run.cacheHit ? 'cached' : 'fresh'}`}>
-                          {run.cacheHit ? '📦' : '✨'}
-                        </span>
-                        <span className="run-time">
-                          {new Date(run.timestamp).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+
+                  <form onSubmit={handleSubmit} className="domain-form">
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        value={target}
+                        onChange={(e) => setTarget(e.target.value)}
+                        placeholder="totalycooldomain.com"
+                        className="domain-input"
+                        disabled={runState !== null && !isTerminalState(runState) || testsLoading}
+                      />
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={!target.trim() || selectedTestIds.length === 0 || (runState !== null && !isTerminalState(runState)) || testsLoading}
+                      >
+                        Run Audit
+                      </button>
+                    </div>
+                  </form>
+
+                  {!testsLoading && selectedTestIds.length === 0 && (
+                    <div className="error-message">Select at least one test in Settings before running an audit.</div>
+                  )}
+
+                  {error && <div className="error-message">{error}</div>}
                 </div>
               </div>
-            )}
-          </section>
+
+              {history.length > 0 && (
+                <div className="recent-runs-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h3 style={{ margin: 0 }}>Recent Audits</h3>
+                    {history.length > 5 && (
+                      <button 
+                        className="btn btn-small" 
+                        onClick={() => {
+                          trackEvent('History Navigation Clicked', {
+                            source: 'audit_page_recent_runs',
+                          });
+                          navigate('/history');
+                        }}
+                      >
+                        View All ({history.length})
+                      </button>
+                    )}
+                  </div>
+                  <div className="recent-runs-list">
+                    {history.slice(0, 5).map((run) => (
+                      <button 
+                        key={run.runId} 
+                        className="recent-run-item" 
+                        onClick={() => {
+                          trackEvent('Recent Audit Opened', {
+                            source: 'audit_page_recent_runs',
+                            cache_hit: run.cacheHit,
+                          });
+                          navigate(`/report/${run.runId}`);
+                        }}
+                        style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
+                      >
+                        <div className="run-target">{run.target}</div>
+                        <div className="run-meta">
+                          <span className={`run-status ${run.cacheHit ? 'cached' : 'fresh'}`}>
+                            {run.cacheHit ? '📦' : '✨'}
+                          </span>
+                          <span className="run-time">
+                            {new Date(run.timestamp).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section className="project-link-section" aria-labelledby="project-link-heading">
+              <div className="project-link-card">
+                <div className="project-link-copy">
+                  <h2 id="project-link-heading">Learn more about this project</h2>
+                  <p>
+                    Read about what this audit covers, current usage limits,
+                    discovery behavior on larger domains, and the roadmap for
+                    accounts and advanced tooling.
+                  </p>
+                </div>
+                <div className="project-link-actions">
+                  <Link className="btn btn-secondary" to="/about">
+                    Learn more about this project
+                  </Link>
+                </div>
+              </div>
+            </section>
+          </>
         ) : (
           <section className="loading-section">
             <div className="loading-card">
@@ -692,7 +762,7 @@ function AuditPage() {
                 </div>
                 <div className="contact-form">
                   <p className="contact-copy">
-                    You've already used all {AUDIT_LIMIT_MAX} anonymous audit{AUDIT_LIMIT_MAX === 1 ? '' : 's'}. Make an account to keep running audits, or send one to our team so we can help you make a plan.
+                    You&apos;ve already used all {AUDIT_LIMIT_MAX} anonymous audit{AUDIT_LIMIT_MAX === 1 ? '' : 's'}. Accounts are still on the way, so for now you can send one to our team and we can help you make a plan.
                   </p>
                   <div className="contact-actions">
                     <button
