@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { trackEvent } from '../lib/analytics';
+import { getAuditLimitEnabled, getAuditLimitMax } from '../lib/auditLimit';
 import artisanLockupDark from '../assets/branding/artisan-studios__lockup__dark__2048w.webp';
 import artisanLockupLight from '../assets/branding/artisan-studios__lockup__light__2048w.webp';
 
@@ -13,6 +14,8 @@ interface TopBarProps {
 const LIGHT_THEME_ICON_URL = '/branding/artisan-studios__mark__dark__1024.webp';
 const DARK_THEME_ICON_URL = '/branding/artisan-studios__mark__light__1024.webp';
 const MOBILE_NAV_MEDIA_QUERY = '(max-width: 1100px)';
+const AUDIT_LIMIT_ENABLED = getAuditLimitEnabled();
+const AUDIT_LIMIT_MAX = getAuditLimitMax();
 
 export function TopBar({ children, onOpenSettings }: TopBarProps) {
   const { theme } = useTheme();
@@ -52,7 +55,7 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
   }, []);
 
   React.useEffect(() => {
-    const faviconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    const faviconLink = document.querySelector<HTMLLinkElement>('link#theme-favicon');
     if (faviconLink) {
       faviconLink.href = mobileIcon;
       faviconLink.type = 'image/webp';
@@ -64,16 +67,16 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
       <div className="topbar-inner">
         <Link to="/" className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="logo-icon">
-            <img
-              className="logo-image logo-image-desktop"
-              src={desktopLogo}
-              alt="Artisan Hosting"
-            />
-            <img
-              className="logo-image logo-image-mobile"
-              src={mobileIcon}
-              alt="Artisan Hosting"
-            />
+             <img
+               className="logo-image logo-image-desktop"
+               src={desktopLogo}
+               alt="Artisan DAP"
+             />
+             <img
+               className="logo-image logo-image-mobile"
+               src={mobileIcon}
+               alt="Artisan DAP"
+             />
           </div>
         </Link>
 
@@ -109,6 +112,18 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
               }}
             >
               Audit
+            </Link>
+            <Link
+              to="/about"
+              className={location.pathname === '/about' ? 'active-link' : ''}
+              onClick={() => {
+                trackEvent('Navigation Clicked', {
+                  destination: 'about',
+                });
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              About
             </Link>
             <Link
               to="/history"
@@ -209,7 +224,14 @@ export function TopBar({ children, onOpenSettings }: TopBarProps) {
 
             <div className="contact-success">
               <p>
-                We're still building the login experience. For now, everything on this site remains available without an account.
+                We&apos;re still building accounts and login. For now, you can use
+                the tool without an account{AUDIT_LIMIT_ENABLED
+                  ? `, up to the current anonymous limit of ${AUDIT_LIMIT_MAX} audits.`
+                  : '.'}
+              </p>
+              <p>
+                If usage grows, accounts will make room for subscriptions,
+                saved workflows, and more advanced tooling.
               </p>
               <button
                 className="btn btn-primary"

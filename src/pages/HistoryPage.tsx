@@ -8,6 +8,7 @@ import '../styles/tokens.css';
 import '../App.css';
 import { useEffect } from 'react';
 import Footer from '../components/Footer';
+import { setPageSeo } from '../lib/seo';
 
 export function HistoryPage() {
   const { theme } = useTheme();
@@ -17,6 +18,16 @@ export function HistoryPage() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    setPageSeo({
+      title: 'Audit History | Artisan DAP',
+      description: 'View saved website performance and technical audit runs in Artisan DAP.',
+      path: '/history',
+      robots: 'noindex,follow',
+      structuredData: null,
+    });
+  }, []);
 
   const handleDelete = (runId: string) => {
     if (window.confirm('Are you sure you want to delete this audit from history?')) {

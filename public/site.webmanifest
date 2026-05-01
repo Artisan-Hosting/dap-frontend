@@ -1,0 +1,20 @@
+{
+  "name": "Artisan DAP",
+  "short_name": "Artisan DAP",
+  "description": "Website performance audit and technical SEO tool for domains and subdomains.",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/branding/artisan-studios__mark__dark__1024.webp",
+      "sizes": "1024x1024",
+      "type": "image/webp"
+    }
+  ],
+  "theme_color": "#08060d",
+  "background_color": "#08060d",
+  "display": "standalone"
+}

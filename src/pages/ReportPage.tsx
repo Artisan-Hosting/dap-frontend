@@ -16,6 +16,7 @@ import type { CanonicalReportResponse } from '../types/api';
 import '../styles/tokens.css';
 import '../App.css';
 import Footer from '../components/Footer';
+import { setPageSeo } from '../lib/seo';
 
 export function ReportPage() {
   const { theme } = useTheme();
@@ -32,6 +33,22 @@ export function ReportPage() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const reportTarget = report?.run.target_input;
+
+    setPageSeo({
+      title: reportTarget
+        ? `${reportTarget} Audit Report | Artisan DAP`
+        : 'Audit Report | Artisan DAP',
+      description: reportTarget
+        ? `Review website performance, technical SEO, DNS, SSL, email, and security findings for ${reportTarget}.`
+        : 'Review website performance, technical SEO, DNS, SSL, email, and security audit findings.',
+      path: runId ? `/report/${runId}` : '/report',
+      robots: 'noindex,follow',
+      structuredData: null,
+    });
+  }, [report, runId]);
 
   useEffect(() => {
     async function fetchReport() {
